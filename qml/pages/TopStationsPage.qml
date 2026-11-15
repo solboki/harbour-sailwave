@@ -12,6 +12,8 @@ Page {
     property bool searchMode: false
     // The search field of the list header (set by the field itself)
     property var searchFieldItem: null
+    // Station key at the last keyboard close (see onCurrentStationChanged)
+    property string _focusStationKey: ""
 
     // Error / empty states (shown below the list, see footer)
     property bool topLoadFailed: false   // top stations could not be loaded at all
@@ -1163,9 +1165,14 @@ Page {
             page.scheduleTopRefresh()
             // Closes the keyboard when a station starts (the search field
             // registers itself; looking it up by child index broke when the
-            // neighbour line was added to the header)
-            if (page.searchFieldItem) {
-                page.searchFieldItem.focus = false
+            // neighbour line was added to the header) - not when only the
+            // logo data of the same station was refreshed
+            var key = appWindow.stationKey(appWindow.currentStation)
+            if (key !== page._focusStationKey) {
+                page._focusStationKey = key
+                if (page.searchFieldItem) {
+                    page.searchFieldItem.focus = false
+                }
             }
         }
     }

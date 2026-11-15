@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import QtQuick 2.6
 import Sailfish.Silica 1.0
+import "../"
 
 // The favourites file on the WebDAV server was changed elsewhere since the
 // last sync (another device, or a first connection to an existing file).

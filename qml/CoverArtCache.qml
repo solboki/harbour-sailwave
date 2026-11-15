@@ -70,12 +70,20 @@ Item {
     // iTunes lookup result cache for this session: title -> { art, album }
     property var _trackCache: ({})
     property string _lookupTitle: ""
+    // Key of the station the cover belongs to (see onCurrentStationChanged)
+    property string _stationKey: ""
 
     Connections {
         target: appWindow
         onCurrentStationChanged: {
-            coverArtCache.trackArtUrl = ""
-            coverArtCache._lookupTitle = ""
+            // Same station with new logo data (refreshCurrentStationLogo):
+            // keep the album cover of the current track, only redo the logo
+            var key = appWindow.stationKey(appWindow.currentStation)
+            if (key !== coverArtCache._stationKey) {
+                coverArtCache._stationKey = key
+                coverArtCache.trackArtUrl = ""
+                coverArtCache._lookupTitle = ""
+            }
             logoTimer.restart()
         }
         onCurrentTrackTitleChanged: trackTimer.restart()
@@ -83,7 +91,10 @@ Item {
         onHomepageOverridesUpdated: logoTimer.restart()
     }
 
-    Component.onCompleted: logoTimer.restart()
+    Component.onCompleted: {
+        _stationKey = appWindow.stationKey(appWindow.currentStation)
+        logoTimer.restart()
+    }
 
     Timer {
         id: logoTimer

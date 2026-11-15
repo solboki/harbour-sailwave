@@ -5,7 +5,7 @@
 Name:       harbour-sailwave-radio
 
 Summary:    Internet radio player for Sailfish OS
-Version:    1.2
+Version:    1.2.1
 Release:    1
 License:    GPL-3.0-or-later
 URL:        https://github.com/t-sappl/harbour-sailwave/
@@ -92,6 +92,17 @@ desktop-file-install --delete-original \
 %{_datadir}/icons/hicolor/*/apps/%{name}.png
 
 %changelog
+* Sat Nov 14 2026 Thomas Sappl <thomas.sappl@gmail.com> - 1.2.1-1
+- Resuming after a pause connects to the stream again: after several
+  hours with many pauses the app could report playing without any sound
+  until it was restarted.
+- Favorites repair a dead logo with the current logo and homepage from
+  radio-browser.info.
+- The sync conflict page opens again (could not be loaded in 1.2).
+- No empty light logo tile in lists when a station's own logo fails late.
+- Manage favorites shows the country names in the app language.
+- Hint under the WebDAV address when it uses plain http.
+
 * Sat Nov 07 2026 Thomas Sappl <thomas.sappl@gmail.com> - 1.2-1
 - Usability update and unified design (details in CHANGELOG.md).
 - Same controls as in Sailcast and Sailfeed: one button style, subtle

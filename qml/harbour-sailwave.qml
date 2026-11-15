@@ -92,7 +92,7 @@ ApplicationWindow {
 
     // App version number (for "About Sailwave" and the User-Agent).
     // Bump it with every release, together with the version in the .spec/.yaml.
-    readonly property string appVersion: "1.2"
+    readonly property string appVersion: "1.2.1"
 
     // radio-browser.info API etiquette: our own User-Agent instead of the Qt default
     property string apiUserAgent: "harbour-sailwave/" + appVersion
@@ -887,6 +887,21 @@ ApplicationWindow {
         } else if (currentStation) {
             // A manual start gets the full set of reconnect attempts again
             reconnectAttempts = 0
+            stallTimer.stop()
+            // Resume = connect to the stream again instead of continuing the
+            // paused pipeline: after a longer pause the server may have
+            // closed the connection, or the audio output was taken by another
+            // app - the player then reported "playing" without any sound
+            // until the app was restarted (user report on 1.1). For a live
+            // station this is right anyway: continuing would first play the
+            // audio buffered before the pause.
+            // The source is emptied first: MediaPlayer ignores setting the
+            // same URL again, and only new media gives a fresh pipeline.
+            player.stop()
+            player.source = ""
+            player.source = currentStation.url_resolved && currentStation.url_resolved.length > 0
+                             ? currentStation.url_resolved
+                             : currentStation.url
             player.play()
         }
     }
@@ -897,6 +912,29 @@ ApplicationWindow {
     // back to that page instead of stacking a second copy.
     function stationKey(st) {
         return st ? (st.stationuuid || st.url || st.name || "") : ""
+    }
+
+    // The favourites took over a new favicon/homepage from radio-browser
+    // (FavoritesStore.updateLogoData): the current station - e.g. the one
+    // restored at start-up - is a copy made before that, so it gets the new
+    // values too and is saved again as the last station. Same station key,
+    // so CoverArtCache keeps the album cover (see there).
+    function refreshCurrentStationLogo(uuid, favicon, homepage) {
+        var st = currentStation
+        if (!st || !uuid || st.stationuuid !== uuid) {
+            return
+        }
+        if ((st.favicon || "") === favicon && (st.homepage || "") === homepage) {
+            return
+        }
+        var copy = {}
+        for (var k in st) {
+            copy[k] = st[k]
+        }
+        copy.favicon = favicon
+        copy.homepage = homepage
+        currentStation = copy
+        persistentState.saveLastStation(copy)
     }
 
     // replaceCurrent: used for the "Similar stations" of an info page. The new

@@ -103,6 +103,9 @@ Page {
             homepage: fav ? (fav.homepage || "") : "",
             stationuuid: fav ? (fav.stationuuid || "") : "",
             country: fav ? (fav.country || "") : "",
+            // the delegate shows the country name from the code (localized);
+            // without this role it always fell back to radio-browser's English name
+            countrycode: fav ? (fav.countrycode || "") : "",
             codec: fav ? (fav.codec || "") : "",
             bitrate: fav ? (fav.bitrate || 0) : 0
         }

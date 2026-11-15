@@ -2,6 +2,19 @@
 
 Package: `harbour-sailwave-radio` · License GPL-3.0-or-later
 
+## 1.2.1-1 – Bugfix (November 2026)
+
+### Fixed
+- No sound after resuming: after several hours with many pauses the app could show the station as playing without any sound until it was restarted. Resuming now connects to the stream again (reported on GitHub for 1.1).
+- Favorites repair a dead logo: when the saved logo no longer loads, the current logo and homepage from radio-browser.info are taken over. Before, a favorite kept the logo address from the day it was saved, even when it no longer worked.
+- The current station gets the refreshed logo too, without playing it again.
+- A station whose own logo fails late (e.g. ROCK RADIO SI) no longer shows an empty light tile in the lists.
+- Manage favorites shows the country names in the app language.
+- The page for a sync conflict with the WebDAV server opens again (it could not be loaded in 1.2).
+
+### New
+- Hint under the WebDAV address when it uses plain http (password and backups can be read on the way).
+
 ## 1.2-1 – Usability and unified design (November 2026)
 
 ### Usability and unified design

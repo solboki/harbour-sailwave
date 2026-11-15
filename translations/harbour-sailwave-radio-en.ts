@@ -303,6 +303,37 @@
     </message>
 </context>
 <context>
+    <name>FavoriteTilesPage</name>
+    <message>
+        <source>Other favorites</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Manage favorites</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Favorites</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Station info</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No favorites yet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Tap the heart next to a station to add it to your favorites.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>FavoritesBackup</name>
     <message>
         <source>WebDAV sign-in failed</source>
@@ -442,37 +473,6 @@
     </message>
 </context>
 <context>
-    <name>FavoriteTilesPage</name>
-    <message>
-        <source>Other favorites</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Settings</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Manage favorites</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Favorites</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Station info</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>No favorites yet</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Tap the heart next to a station to add it to your favorites.</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>GroupNameDialog</name>
     <message>
         <source>Group name</source>
@@ -495,64 +495,6 @@
     </message>
     <message>
         <source>now in %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>harbour-sailwave</name>
-    <message>
-        <source>Added to Other favorites. Press and hold the station to move it.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Added to favorites</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Station not reachable. Check your connection and tap play to try again.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Vote counted, thank you!</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Vote not possible, no connection</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Vote not possible (already voted?)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Favorites</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Sailwave</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Track history</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Advanced search</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message numerus="yes">
-        <source>Sleep timer: %n min</source>
-        <translation>
-            <numerusform>Sleep timer: %n min</numerusform>
-            <numerusform>Sleep timer: %n min</numerusform>
-        </translation>
-    </message>
-    <message>
-        <source>Tap the station name for station info</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Tap the arrow for recent tracks and the sleep timer</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -943,6 +885,10 @@
     </message>
     <message>
         <source>Nextcloud and ownCloud: the server address is enough (e.g. https://cloud.example.com). Other WebDAV storage: the full folder address.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unencrypted connection (http): the password and the backups can be read on the way. Use https if the server supports it.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1647,6 +1593,64 @@
     <name>TrackPreview</name>
     <message>
         <source>Open track history</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>harbour-sailwave</name>
+    <message>
+        <source>Added to Other favorites. Press and hold the station to move it.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Added to favorites</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Station not reachable. Check your connection and tap play to try again.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Vote counted, thank you!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Vote not possible, no connection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Vote not possible (already voted?)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Favorites</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Sailwave</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Track history</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Advanced search</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source>Sleep timer: %n min</source>
+        <translation>
+            <numerusform>Sleep timer: %n min</numerusform>
+            <numerusform>Sleep timer: %n min</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Tap the station name for station info</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Tap the arrow for recent tracks and the sleep timer</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

@@ -10,16 +10,28 @@ Open items and plans. Architecture and design decisions are in [`DESIGN.md`](DES
 - [x] **Landscape:** support landscape on all pages (1.0 is portrait only; requested by users, e.g. for use in the car) – player panel on the right (see DESIGN 5a), tested
 - [x] **Favorite tiles:** large favourite tiles as an extra ring page, setting off / always / only in landscape + open when turning (see DESIGN 5b), tested
 
-## Version 1.1.1 – bugfix (November 2026, tested, ready to publish)
+## Version 1.1.1 – bugfix (November 2026, included in 1.2)
 
 - [x] **Large system font:** rows, headings, the player bar and the favorite tiles grow with the font size (forum report: overlapping rows with a large font) – see DESIGN 10c
 - [x] **Advanced search:** long filter values (genres, countries) start at the left and fade out instead of losing their beginning
 - [x] **App icon:** more depth, no rim (see DESIGN 10)
 - [x] **English plural forms:** new `translations/harbour-sailwave-radio-en.ts` ("1 favorite / 2 favorites"); the other languages already had them since 1.0
 
-## Version 1.2 – built (build 127b), in device test
+## Version 1.2.1 – bugfix (build 133, all tests OK, ready to publish)
 
-Not published yet. Package: `sailwave-complete_127b.zip` (10/11 Nov 2026). Tests: TEST-PROTOCOL sections 35–45.
+- [x] **No sound after resuming** (GitHub report on 1.1: after several hours with many pauses the app showed "playing" without sound until a restart): resuming now reconnects the stream (see DESIGN 9). Tests: section 50. Ask the reporter whether 1.2.1 fixes it.
+- [x] **Favorites repair a dead logo** with the current logo and homepage from radio-browser.info – only when the stored logo does not load (dead favicon of ORF Radio Kärnten). Tests: section 50.
+- [x] **Also refreshed: the current / last played station** (build 130) – gets the new logo data without being played again.
+- [x] **Sync conflict page did not open** (missing import since 1.2, "Could not load page"; build 131).
+- [x] **Empty light logo tile** in the start page rows for ROCK RADIO SI (dead favicon, Google fallback works in "Last heard", player bar, station info). Log of 131: logic right, the layer for the rounded corners kept an old frame; build 132 rebuilds the layer when the logo changes (test 50.23 OK). Diagnosis removed in build 133.
+- [x] **Favorites page: localized country names** (the row lacked the `countrycode` role, the English name of radio-browser was shown). Role pattern of 127b checked on the favorites page and the track history: otherwise fine.
+- [x] **Hint for WebDAV over http** under the URL (password and backups readable on the way).
+- [ ] **Release:** Harbour check done with the tests (50.12); OpenRepos, then commit/tag/push, Jolla Store; answer the GitHub report.
+- [ ] Later, only if the problem comes back: watchdog "playing but position does not advance" (check on the device first whether `position` advances for streams).
+
+## Version 1.2 – released (13 Nov 2026)
+
+OpenRepos, GitHub release `v1.2`, Jolla Store submitted. Tests: TEST-PROTOCOL sections 35–49, all OK; open only 33.11 (Storeman after publishing).
 
 ### Built since 1.1.1 (all done, see DESIGN and CHANGELOG)
 
@@ -35,7 +47,7 @@ Not published yet. Package: `sailwave-complete_127b.zip` (10/11 Nov 2026). Tests
 - [x] **Player bar:** swipe up/down to open and close
 - [x] **Start page:** rows with a fixed role set (empty rows after the start), top-station tag weights computed once
 
-### Open before the release
+### Done for the release (kept for reference)
 
 - [ ] **Built in 128: Nextcloud sign-in in the browser (Login Flow v2)** for WebDAV (`src/nextcloudlogin.*`, button in Settings → Backup and sync). Tests: section 46 (all passed on the device, 128c).
 - [ ] **Built in 128d: start page header without a jump** (header grows after the start, `_topPinned`). Tests: section 47 (passed on the device).
@@ -48,7 +60,7 @@ Not published yet. Package: `sailwave-complete_127b.zip` (10/11 Nov 2026). Tests
 - [ ] **Final check:** version 1.2 in spec and `appVersion` (equal), translations de/es/fr complete, CHANGELOG and `%changelog` complete
 - [ ] **Release:** upload to OpenRepos, then Thomas commits, tags and pushes; then submit to the Jolla Store (1.1.1 is already submitted there with its known errors)
 - [ ] (optional, device) mini-player marquee start; second blind round with screenshots (broken favourite with "Find alternative", first start without favourites, running sleep timer, selected filter chip, bottom of Settings, backup dialog, info page with tags)
-- [ ] **Watch:** header fault (root cause unknown; if it comes back: what was done just before, `journalctl -b | grep "Sailwave scroll"`); empty rows after the start (cause not confirmed, test 45); also check `FavoritesPage` and `TrackHistoryPage` for the same role pattern
+- [ ] **Watch:** header fault (root cause unknown; if it comes back: what was done just before, `journalctl -b | grep "Sailwave scroll"`); empty rows after the start (cause not confirmed, test 45; `FavoritesPage` and `TrackHistoryPage` checked in 1.2.1)
 
 ### Postponed (after 1.2)
 
@@ -60,7 +72,7 @@ Not published yet. Package: `sailwave-complete_127b.zip` (10/11 Nov 2026). Tests
 - [ ] Corrections to radio-browser.info (station data such as homepage, logo): first find out why Shortwave removed this feature and how to confirm and check the data
 - [ ] Start page: station history lists favourites too (a favourite can show up in its group and in the history) – decide after some use; the sections (groups, history, top stations) look alike
 - [ ] Play stations directly on the favourites page (needs another way to show playback there)
-- [ ] From the code review, on purpose not done: request timeouts (no timer in the JS library), warning for WebDAV over http and redirects, scrolling when a filter section collapses, the low-priority list in REVIEW-121.md
+- [ ] From the code review, on purpose not done: request timeouts (no timer in the JS library), warning for WebDAV redirects (the http hint is in 1.2.1), scrolling when a filter section collapses, the low-priority list in REVIEW-121.md
 
 ### Usability update 1.2 – details
 
@@ -93,5 +105,3 @@ Not published yet. Package: `sailwave-complete_127b.zip` (10/11 Nov 2026). Tests
 
 - Favourites page: dragging the bottom favourite occasionally fails the first time (not reliably reproducible).
 
-## After 1.2
-- [ ] Favourites keep the logo data (favicon/homepage) from the time they were saved; a dead favicon then stays (seen with ORF Radio Kärnten). When a favourite is played, update favicon/homepage from the fresh radio-browser.info data.

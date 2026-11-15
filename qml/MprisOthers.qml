@@ -52,6 +52,8 @@ Item {
         iface: "org.freedesktop.DBus"
     }
 
+    property bool _listWarned: false
+
     function refreshServices() {
         lister.call("ListNames", [], function(names) {
             var found = []
@@ -63,11 +65,15 @@ Item {
             }
             found.sort()
             if (found.join("|") !== root.services.join("|")) {
-                console.log("MprisOthers: other players: " + (found.length > 0 ? found.join(", ") : "none"))
                 root.services = found
             }
         }, function(error) {
-            console.log("MprisOthers: ListNames failed: " + error)
+            // Only once: the list is read every 5 s (e.g. a sandbox that
+            // blocks the call would otherwise fill the log)
+            if (!root._listWarned) {
+                root._listWarned = true
+                console.warn("MprisOthers: ListNames failed: " + error)
+            }
         })
     }
 
@@ -101,7 +107,6 @@ Item {
         if (before === now) {
             return
         }
-        console.log("MprisOthers: " + service + " " + (before || "?") + " -> " + now)
         status[service] = now
     }
 
@@ -140,14 +145,14 @@ Item {
                                         entry.pause()
                                     }
                                 }, function(error) {
-                                    console.log("MprisOthers: status of " + entry.name + " failed: " + error)
+                                    // transient: e.g. the player has just quit
+                                    // (it leaves the list at the next ListNames)
                                 })
             }
 
             function pause() {
-                console.log("MprisOthers: pausing " + entry.name)
                 ctl.call("Pause", [], function() {}, function(error) {
-                    console.log("MprisOthers: Pause failed: " + error)
+                    console.warn("MprisOthers: Pause failed: " + error)
                 })
                 root.status[entry.name] = "Paused"
             }
@@ -221,6 +226,4 @@ Item {
             }
         }
     }
-
-    Component.onCompleted: console.log("MprisOthers: ready (D-Bus)")
 }

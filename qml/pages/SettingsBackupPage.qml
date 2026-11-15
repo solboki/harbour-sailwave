@@ -176,6 +176,18 @@ Page {
                     text: qsTr("Nextcloud and ownCloud: the server address is enough (e.g. https://cloud.example.com). "
                                + "Other WebDAV storage: the full folder address.")
                 }
+                // Plain http sends the password (Basic auth) and the backup
+                // readable over the network - a hint, not a block (some use
+                // it inside their own network)
+                Label {
+                    x: Theme.horizontalPageMargin
+                    width: parent.width - 2 * Theme.horizontalPageMargin
+                    visible: /^\s*http:\/\//i.test(urlField.text)
+                    wrapMode: Text.Wrap
+                    color: Theme.highlightColor
+                    font.pixelSize: Theme.fontSizeExtraSmall
+                    text: qsTr("Unencrypted connection (http): the password and the backups can be read on the way. Use https if the server supports it.")
+                }
 
                 // Nextcloud: sign in in the browser, no app password to type
                 // (as in Sailcast)

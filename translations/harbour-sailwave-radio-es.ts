@@ -303,6 +303,37 @@
     </message>
 </context>
 <context>
+    <name>FavoriteTilesPage</name>
+    <message>
+        <source>Other favorites</source>
+        <translation>Otros favoritos</translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation>Ajustes</translation>
+    </message>
+    <message>
+        <source>Manage favorites</source>
+        <translation>Gestionar favoritos</translation>
+    </message>
+    <message>
+        <source>Favorites</source>
+        <translation>Favoritos</translation>
+    </message>
+    <message>
+        <source>Station info</source>
+        <translation>Información de la emisora</translation>
+    </message>
+    <message>
+        <source>No favorites yet</source>
+        <translation>Aún no hay favoritos</translation>
+    </message>
+    <message>
+        <source>Tap the heart next to a station to add it to your favorites.</source>
+        <translation>Tocar el corazón junto a una emisora para añadirla a favoritos.</translation>
+    </message>
+</context>
+<context>
     <name>FavoritesBackup</name>
     <message>
         <source>WebDAV sign-in failed</source>
@@ -442,37 +473,6 @@
     </message>
 </context>
 <context>
-    <name>FavoriteTilesPage</name>
-    <message>
-        <source>Other favorites</source>
-        <translation>Otros favoritos</translation>
-    </message>
-    <message>
-        <source>Settings</source>
-        <translation>Ajustes</translation>
-    </message>
-    <message>
-        <source>Manage favorites</source>
-        <translation>Gestionar favoritos</translation>
-    </message>
-    <message>
-        <source>Favorites</source>
-        <translation>Favoritos</translation>
-    </message>
-    <message>
-        <source>Station info</source>
-        <translation>Información de la emisora</translation>
-    </message>
-    <message>
-        <source>No favorites yet</source>
-        <translation>Aún no hay favoritos</translation>
-    </message>
-    <message>
-        <source>Tap the heart next to a station to add it to your favorites.</source>
-        <translation>Tocar el corazón junto a una emisora para añadirla a favoritos.</translation>
-    </message>
-</context>
-<context>
     <name>GroupNameDialog</name>
     <message>
         <source>Group name</source>
@@ -496,64 +496,6 @@
     <message>
         <source>now in %1</source>
         <translation>ahora en %1</translation>
-    </message>
-</context>
-<context>
-    <name>harbour-sailwave</name>
-    <message>
-        <source>Added to Other favorites. Press and hold the station to move it.</source>
-        <translation>Añadida a «Otros favoritos». Mantén pulsada la emisora para moverla.</translation>
-    </message>
-    <message>
-        <source>Added to favorites</source>
-        <translation>Añadida a favoritos</translation>
-    </message>
-    <message>
-        <source>Station not reachable. Check your connection and tap play to try again.</source>
-        <translation>Emisora no disponible. Comprueba la conexión y toca reproducir para reintentar.</translation>
-    </message>
-    <message>
-        <source>Vote counted, thank you!</source>
-        <translation>¡Voto contado, gracias!</translation>
-    </message>
-    <message>
-        <source>Vote not possible, no connection</source>
-        <translation>No se puede votar, sin conexión</translation>
-    </message>
-    <message>
-        <source>Vote not possible (already voted?)</source>
-        <translation>Voto no posible (¿ya has votado?)</translation>
-    </message>
-    <message>
-        <source>Favorites</source>
-        <translation>Favoritos</translation>
-    </message>
-    <message>
-        <source>Sailwave</source>
-        <translation>Sailwave</translation>
-    </message>
-    <message>
-        <source>Track history</source>
-        <translation>Historial de canciones</translation>
-    </message>
-    <message>
-        <source>Advanced search</source>
-        <translation>Búsqueda avanzada</translation>
-    </message>
-    <message numerus="yes">
-        <source>Sleep timer: %n min</source>
-        <translation>
-            <numerusform>Temporizador: %n minuto</numerusform>
-            <numerusform>Temporizador: %n minutos</numerusform>
-        </translation>
-    </message>
-    <message>
-        <source>Tap the station name for station info</source>
-        <translation>Tocar el nombre de la emisora para ver su información</translation>
-    </message>
-    <message>
-        <source>Tap the arrow for recent tracks and the sleep timer</source>
-        <translation>Tocar la flecha para ver las últimas canciones y el temporizador de apagado</translation>
     </message>
 </context>
 <context>
@@ -944,6 +886,10 @@
     <message>
         <source>Nextcloud and ownCloud: the server address is enough (e.g. https://cloud.example.com). Other WebDAV storage: the full folder address.</source>
         <translation>Nextcloud y ownCloud: basta con la dirección del servidor (p. ej. https://cloud.example.com). Otro almacenamiento WebDAV: la dirección completa de la carpeta.</translation>
+    </message>
+    <message>
+        <source>Unencrypted connection (http): the password and the backups can be read on the way. Use https if the server supports it.</source>
+        <translation>Conexión sin cifrar (http): la contraseña y las copias de seguridad pueden leerse por el camino. Usar https si el servidor lo admite.</translation>
     </message>
     <message>
         <source>Sign in with the browser</source>
@@ -1648,6 +1594,64 @@
     <message>
         <source>Open track history</source>
         <translation>Abrir historial de canciones</translation>
+    </message>
+</context>
+<context>
+    <name>harbour-sailwave</name>
+    <message>
+        <source>Added to Other favorites. Press and hold the station to move it.</source>
+        <translation>Añadida a «Otros favoritos». Mantén pulsada la emisora para moverla.</translation>
+    </message>
+    <message>
+        <source>Added to favorites</source>
+        <translation>Añadida a favoritos</translation>
+    </message>
+    <message>
+        <source>Station not reachable. Check your connection and tap play to try again.</source>
+        <translation>Emisora no disponible. Comprueba la conexión y toca reproducir para reintentar.</translation>
+    </message>
+    <message>
+        <source>Vote counted, thank you!</source>
+        <translation>¡Voto contado, gracias!</translation>
+    </message>
+    <message>
+        <source>Vote not possible, no connection</source>
+        <translation>No se puede votar, sin conexión</translation>
+    </message>
+    <message>
+        <source>Vote not possible (already voted?)</source>
+        <translation>Voto no posible (¿ya has votado?)</translation>
+    </message>
+    <message>
+        <source>Favorites</source>
+        <translation>Favoritos</translation>
+    </message>
+    <message>
+        <source>Sailwave</source>
+        <translation>Sailwave</translation>
+    </message>
+    <message>
+        <source>Track history</source>
+        <translation>Historial de canciones</translation>
+    </message>
+    <message>
+        <source>Advanced search</source>
+        <translation>Búsqueda avanzada</translation>
+    </message>
+    <message numerus="yes">
+        <source>Sleep timer: %n min</source>
+        <translation>
+            <numerusform>Temporizador: %n minuto</numerusform>
+            <numerusform>Temporizador: %n minutos</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Tap the station name for station info</source>
+        <translation>Tocar el nombre de la emisora para ver su información</translation>
+    </message>
+    <message>
+        <source>Tap the arrow for recent tracks and the sleep timer</source>
+        <translation>Tocar la flecha para ver las últimas canciones y el temporizador de apagado</translation>
     </message>
 </context>
 </TS>

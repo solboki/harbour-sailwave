@@ -150,10 +150,32 @@ Item {
         }
     }
 
+    // The layer below (rounded corners) is switched off and on again
+    // whenever the shown logo changes. Seen on the device (Qt 5.6): in list
+    // rows the layer kept an intermediate frame - the light tile without
+    // the logo - when the primary favicon failed late and the Google image
+    // replaced it; the state was right (no tile, image ready and visible),
+    // the screen showed an empty light tile (ROCK RADIO SI). A fresh layer
+    // draws the current content.
+    property bool _layerOn: true
+    readonly property string _shownState: root.activeUrl + "|" + root.imageReady + "|"
+                                          + root.hasTile + "|" + root.darkTile
+    on_ShownStateChanged: {
+        root._layerOn = false
+        relayerTimer.restart()
+    }
+    Timer {
+        id: relayerTimer
+        // at least one frame without the layer, otherwise the scene graph
+        // may never see it switched off
+        interval: 50
+        onTriggered: root._layerOn = true
+    }
+
     Item {
         id: content
         anchors.fill: parent
-        layer.enabled: true
+        layer.enabled: root._layerOn
         layer.smooth: true
         layer.effect: ShaderEffect {
             property real corner: 0.2

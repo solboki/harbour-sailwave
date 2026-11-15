@@ -72,6 +72,7 @@ Item {
                 byUuid[list[j].stationuuid] = list[j]
             }
             var result = {}
+            var latest = {}
             for (var k = 0; k < favorites.length; k++) {
                 var fav = favorites[k]
                 if (!fav.stationuuid) {
@@ -80,13 +81,82 @@ Item {
                 var st = byUuid[fav.stationuuid]
                 if (!st) {
                     result[fav.url] = "missing"
-                } else if (Number(st.lastcheckok) === 0) {
+                    continue
+                }
+                if (Number(st.lastcheckok) === 0) {
                     result[fav.url] = "broken"
                 }
+                latest[fav.stationuuid] = { favicon: st.favicon || "", homepage: st.homepage || "" }
             }
             health = result
             healthVersion++
+            latestLogoData = latest
+            applyLatestLogoData()
         })
+    }
+
+    // Logo data as radio-browser lists it now, per stationuuid
+    // ({ favicon, homepage }), from the last reachability request.
+    property var latestLogoData: ({})
+
+    // A favourite keeps the favicon/homepage from the day it was saved; a
+    // favicon URL that has died since then stays (ORF Radio Kärnten). The
+    // current values from radio-browser are taken over ONLY when the stored
+    // favicon is missing or known to be broken (it failed to load somewhere
+    // in the app) - never over a logo that works: radio-browser's value is
+    // not always the better one. The homepage comes along in that case, or
+    // when none is stored. Runs after each reachability request and whenever
+    // another logo URL is found broken, so it rarely changes anything (and
+    // rarely triggers a backup/sync).
+    function applyLatestLogoData() {
+        var entries = []
+        for (var i = 0; i < favorites.length; i++) {
+            var fav = favorites[i]
+            var latest = fav.stationuuid ? latestLogoData[fav.stationuuid] : undefined
+            if (!latest) {
+                continue
+            }
+            var storedBad = fav.favicon.length === 0 || appWindow.isIconUrlBroken(fav.favicon)
+            var freshOk = latest.favicon.length > 0 && latest.favicon !== fav.favicon
+                          && !appWindow.isIconUrlBroken(latest.favicon)
+            var favicon = (storedBad && freshOk) ? latest.favicon : fav.favicon
+            var homepage = (favicon !== fav.favicon || fav.homepage.length === 0) && latest.homepage.length > 0
+                           ? latest.homepage : fav.homepage
+            if (favicon !== fav.favicon || homepage !== fav.homepage) {
+                entries.push({ uuid: fav.stationuuid, favicon: favicon, homepage: homepage })
+            }
+        }
+        if (entries.length > 0) {
+            updateLogoData(entries)
+        }
+    }
+
+    // A logo URL was found broken somewhere: maybe a favourite can take over
+    // the current one now (bundled, several URLs often fail at once)
+    Connections {
+        target: appWindow
+        onBrokenIconRevisionChanged: logoApplyTimer.restart()
+    }
+    Timer {
+        id: logoApplyTimer
+        interval: 1000
+        onTriggered: favoritesStore.applyLatestLogoData()
+    }
+
+    // Stores the given favicon/homepage values ({ uuid, favicon, homepage })
+    // and passes them on to the current station (see
+    // appWindow.refreshCurrentStationLogo).
+    function updateLogoData(entries) {
+        db().transaction(function(tx) {
+            for (var i = 0; i < entries.length; i++) {
+                tx.executeSql("UPDATE favorites SET favicon = ?, homepage = ? WHERE stationuuid = ?",
+                              [entries[i].favicon, entries[i].homepage, entries[i].uuid])
+            }
+        })
+        reload()
+        for (var j = 0; j < entries.length; j++) {
+            appWindow.refreshCurrentStationLogo(entries[j].uuid, entries[j].favicon, entries[j].homepage)
+        }
     }
 
     Component.onCompleted: {
