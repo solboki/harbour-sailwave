@@ -21,9 +21,23 @@ QT += network multimedia
 PKGCONFIG += sailfishsecrets
 INCLUDEPATH += /usr/include/Sailfish
 
+# Sailplay SDK v1 (provider side, copied from Sailplay - see
+# sailplay-sdk/README.md): Sailwave in the car with Sailplay
+include(sailplay-sdk/sailplay-sdk.pri)
+
+# Jolla Store build without Sailplay: qmake CONFIG+=store, from the spec
+# with "--with store" (the Sailjail profile below is not allowed there)
+CONFIG(store): DEFINES += SAILWAVE_STORE
+!CONFIG(store) {
+    sailjailprofile.files = rpm/harbour-sailwave-radio.profile
+    sailjailprofile.path = /etc/sailjail/permissions
+    INSTALLS += sailjailprofile
+}
+
 SOURCES += src/harbour-sailwave.cpp \
     src/artcomposer.cpp \
     src/nextcloudlogin.cpp \
+    src/sailplaybridge.cpp \
     src/secretstore.cpp \
     src/webdavclient.cpp
 
@@ -32,12 +46,15 @@ HEADERS += \
     src/filehelper.h \
     src/networkaccess.h \
     src/nextcloudlogin.h \
+    src/sailplaybridge.h \
     src/secretstore.h \
     src/webdavclient.h
 
 # Listed only so that Qt Creator shows them in the project tree.
 # Installation is handled by CONFIG += sailfishapp (the whole qml/ folder).
 OTHER_FILES += rpm/harbour-sailwave-radio.spec \
+    rpm/harbour-sailwave-radio.profile \
+    sailplay-sdk/README.md \
     harbour-sailwave-radio.desktop \
     qml/harbour-sailwave.qml \
     qml/AppSettings.qml \

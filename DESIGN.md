@@ -358,6 +358,16 @@ Sailfish has no audio focus: a second app that starts playing does not pause the
 - **History:** the first version (1.2 builds 119–126) used `MprisManager`, which does not exist in `Amber.Mpris` – it never loaded; earlier test results came from Sailfish's own routing.
 - Sailjail: the Audio permission covers talking to the MPRIS names (checked on the device).
 
+## 10f. Sailplay (car screen, proposed)
+
+[Sailplay](https://github.com/0312birdzhang/harbour-sailplay) brings wireless CarPlay / Android Auto to Sailfish OS. Its car screen already controls any MPRIS player (`MprisIntegration.qml`); through its application SDK v1 an app can also offer a list to browse. Sailwave offers **Favorites** (with groups: the groups, then "Other favorites", as on the Favorites page), the **Station history** and a **search** in both (every word in the name, country or tags; no online search from the car). Tapping a station plays it with `appWindow.playStation`; choosing the station that is playing does not restart it. Play/pause and next/previous favourite stay with MPRIS.
+
+- **Code:** the stations live in QML, so `harbour-sailwave.qml` hands a copy to `src/sailplaybridge.cpp` whenever they change (`favoritesChanged`, `groupsChanged`, `stationHistoryUpdated`, at start-up). The bridge answers the car's queries (`content.browse`, `content.search`, at most 50 rows per reply) and the action `sailwave.play` (`key`: a hash of the stream URL - row ids hold at most 256 characters), which emits `playRequested` with the station as the lists have it. The SDK state `media` (station, title, playing) follows the player. The catalog version changes with the lists (at most twice a second), not with the track titles.
+- **SDK:** the provider side is copied unchanged into `sailplay-sdk/` (GPL-3.0-or-later, commit in its README; the same copy as in Sailcast), so the build needs no Sailplay on the build host.
+- **D-Bus name and sandbox:** Sailwave now registers `harbour-sailwave.harbour-sailwave` (OrganizationName.ApplicationName, which Sailjail allows) after exporting the SDK objects, and the `.desktop` has `ExecDBus` so the car can start it; the `X-Sailplay-*` keys name that service. Sailjail needs `/etc/sailjail/permissions/harbour-sailwave-radio.profile` for the answers (signals to the car's temporary name `org.sailplay.Client.*`).
+- **Jolla Store build:** `rpmbuild --with store` (qmake `CONFIG+=store`): no SDK objects, no D-Bus name, the spec removes the `X-Sailplay-*` keys and `ExecDBus`, no profile.
+- **Not yet:** station logos in the car list (Content1 has no image field yet); online search and top stations from the car.
+
 ## 11. Licence and publishing
 
 - Licence **GPL-3.0-or-later** (`LICENSE` contains the unchanged GPL-3.0 text); every source file starts with an SPDX header.

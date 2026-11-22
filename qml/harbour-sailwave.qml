@@ -174,6 +174,42 @@ ApplicationWindow {
         trackHistoryLimit: appSettingsInstance.trackHistoryLimit
     }
 
+    // Sailplay (car screen, see src/sailplaybridge.h): the car browses a
+    // copy of the favourites and the station history; a station chosen
+    // there plays here. The car's player itself goes through MPRIS.
+    Connections {
+        target: favoritesStore
+        onFavoritesChanged: appWindow._sailplayFavorites()
+        onGroupsChanged: appWindow._sailplayFavorites()
+    }
+    Connections {
+        target: appWindow
+        onStationHistoryUpdated: appWindow._sailplayHistory()
+        onCurrentStationChanged: appWindow._sailplayPlayback()
+        onCurrentTrackDisplayChanged: appWindow._sailplayPlayback()
+        onIsPlayingChanged: appWindow._sailplayPlayback()
+    }
+    Connections {
+        target: sailplay
+        onPlayRequested: {
+            // Choosing the station that is playing does not restart it
+            if (appWindow.currentStation && appWindow.isPlaying
+                    && appWindow.currentStation.url === station.url) {
+                return
+            }
+            appWindow.playStation(station)
+        }
+    }
+    function _sailplayFavorites() {
+        sailplay.setFavorites(favoritesStore.favorites, favoritesStore.groups)
+    }
+    function _sailplayHistory() {
+        sailplay.setHistory(persistentState.getStationHistory())
+    }
+    function _sailplayPlayback() {
+        sailplay.setPlayback(currentStation ? currentStation.name : "", currentTrackDisplay, isPlaying)
+    }
+
     // Sleep timer: pauses playback at the end (the station stays selected)
     SleepTimer {
         id: sleepTimerInstance
@@ -1081,6 +1117,9 @@ ApplicationWindow {
     }
 
     Component.onCompleted: {
+        // Sailplay: the lists for the car (favourites may already be loaded)
+        _sailplayFavorites()
+        _sailplayHistory()
         pageStack.push(ringTopStationsPage, {}, PageStackAction.Immediate)
         ringPageActivated(pageStack.currentPage)
         appSettingsInstance.ensureLoaded()

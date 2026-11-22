@@ -37,6 +37,10 @@ BuildRequires:  desktop-file-utils
 # it, a clean OBS/Chum build environment only with this
 BuildRequires:  qt5-qttools-linguist
 
+# Jolla Store build: rpmbuild --with store (no Sailplay: no SDK objects,
+# no X-Sailplay keys, no Sailjail profile - see harbour-sailwave-radio.pro)
+%bcond_with store
+
 %description
 Sailwave brings thousands of internet radio stations to Sailfish OS - from
 the community database radio-browser.info, in a native Silica interface:
@@ -73,7 +77,7 @@ Links:
 %setup -q -n %{name}-%{version}
 
 %build
-%qmake5
+%qmake5 %{?with_store:CONFIG+=store}
 make %{?_smp_mflags}
 
 %install
@@ -84,12 +88,21 @@ desktop-file-install --delete-original \
   --dir %{buildroot}%{_datadir}/applications \
    %{buildroot}%{_datadir}/applications/*.desktop
 
+# Sailplay (car screen) is not part of the Jolla Store build
+%if %{with store}
+sed -i -e '/^X-Sailplay-/d' -e '/^ExecDBus=/d' %{buildroot}%{_datadir}/applications/%{name}.desktop
+%endif
+
 %files
 %defattr(-,root,root,-)
 %{_bindir}/%{name}
 %{_datadir}/%{name}
 %{_datadir}/applications/%{name}.desktop
 %{_datadir}/icons/hicolor/*/apps/%{name}.png
+# Sailplay: Sailjail rules for the car's SDK client (not in the store build)
+%if %{without store}
+%config /etc/sailjail/permissions/%{name}.profile
+%endif
 
 %changelog
 * Sat Nov 14 2026 Thomas Sappl <thomas.sappl@gmail.com> - 1.2.1-1

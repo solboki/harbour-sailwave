@@ -5,11 +5,15 @@
 #include <QQmlContext>
 #include <QQmlEngine>
 #include <QtQml>
+#include <QDBusConnection>
+#include <QDBusError>
+#include <QDebug>
 
 #include "artcomposer.h"
 #include "filehelper.h"
 #include "networkaccess.h"
 #include "nextcloudlogin.h"
+#include "sailplaybridge.h"
 #include "secretstore.h"
 #include "webdavclient.h"
 
@@ -31,6 +35,9 @@ int main(int argc, char *argv[])
     NextcloudLogin nextcloudLogin;
     // WebDAV password in Sailfish Secrets instead of the app database
     SecretStore secretStore;
+    // Sailwave in the car with Sailplay (see sailplaybridge.h); QML hands it
+    // the favourites and the station history
+    SailplayBridge sailplay;
 
     QScopedPointer<QQuickView> view(SailfishApp::createView());
 
@@ -42,8 +49,22 @@ int main(int argc, char *argv[])
     view->rootContext()->setContextProperty(QStringLiteral("webDav"), &webDav);
     view->rootContext()->setContextProperty(QStringLiteral("nextcloudLogin"), &nextcloudLogin);
     view->rootContext()->setContextProperty(QStringLiteral("secretStore"), &secretStore);
+    view->rootContext()->setContextProperty(QStringLiteral("sailplay"), &sailplay);
 
     view->setSource(SailfishApp::pathTo("qml/harbour-sailwave.qml"));
+
+    // Sailplay: the SDK objects first, then the app's D-Bus name
+    // (OrganizationName.ApplicationName of the .desktop file), so that a car
+    // starting Sailwave over D-Bus (ExecDBus) opens its session as soon as
+    // the name appears. Not in the Jolla Store build (needs a Sailjail
+    // profile, see the spec).
+#ifndef SAILWAVE_STORE
+    sailplay.start();
+    QDBusConnection bus = QDBusConnection::sessionBus();
+    if (!bus.registerService(QStringLiteral("harbour-sailwave.harbour-sailwave"))) {
+        qWarning() << "D-Bus name not registered:" << bus.lastError().message();
+    }
+#endif
     view->show();
 
     return app->exec();
