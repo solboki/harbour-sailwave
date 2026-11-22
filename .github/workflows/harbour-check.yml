@@ -1,0 +1,60 @@
+# Builds the Jolla Store version of a branch (rpmbuild --with store) and
+# runs the Harbour RPM validator of the Sailfish SDK on it (fork only).
+# Actions -> "Harbour check" -> "Run workflow".
+name: Harbour check
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Branch, tag or commit to check'
+        required: true
+        default: 'sailplay-sdk'
+      release:
+        description: 'Sailfish OS build target'
+        required: true
+        default: '5.2.0.15'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      # The Store build is "--with store"; mb2 builds the default, so make
+      # the store variant the default for this check only
+      - name: Select the Store variant
+        run: |
+          sed -i 's/^%bcond_with store/%bcond_without store/' rpm/*.spec
+          grep -n 'bcond' rpm/*.spec
+
+      - name: Build and validate (aarch64)
+        run: |
+          mkdir -p RPMS && chmod a+w RPMS . 
+          docker run --rm --privileged -v "$PWD":/workspace \
+            coderus/sailfishos-platform-sdk:${{ inputs.release }} /bin/bash -c '
+              set -x
+              T=SailfishOS-${{ inputs.release }}-aarch64
+              mkdir -p ~/build && cp -r /workspace/. ~/build/ && cd ~/build
+              mb2 -t $T build || exit 1
+              for f in RPMS/*.rpm; do
+                case "$f" in *debug*) continue;; esac
+                echo "=== $f"; rpm -qlp "$f"
+                (mb2 -t $T check -s harbour "$f" || rpmvalidation --target $T --suites harbour "$f" \
+                  || /usr/bin/rpmvalidation.sh --target $T --suites harbour "$f") 2>&1 | tee -a /workspace/RPMS/harbour-check.txt
+              done
+              cp RPMS/*.rpm /workspace/RPMS/'
+
+      - name: Result
+        if: always()
+        run: |
+          cat RPMS/harbour-check.txt || true
+          grep -q -E "^ERROR|FAILED|Validation failed" RPMS/harbour-check.txt && exit 1 || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: harbour-check-run${{ github.run_number }}
+          path: RPMS/
