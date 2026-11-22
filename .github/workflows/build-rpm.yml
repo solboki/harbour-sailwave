@@ -1,0 +1,49 @@
+# Builds Sailwave RPMs for testing on a phone (fork only, not for upstream).
+# Actions -> "Build RPM" -> "Run workflow", choose the branch to build.
+name: Build RPM
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Branch, tag or commit to build'
+        required: true
+        default: 'sailplay-sdk'
+      release:
+        description: 'Sailfish OS build target'
+        required: true
+        default: '5.2.0.15'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [aarch64, armv7hl]
+    steps:
+      - name: Check out ${{ inputs.ref }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      # A test build must not be taken for the official package: the
+      # branch name and run number go into the RPM release
+      - name: Mark the package as a test build
+        run: |
+          tag=$(echo "${{ inputs.ref }}" | tr -c 'A-Za-z0-9\n' '_')
+          sed -i "s/^Release:.*/Release:    1.${tag}.${{ github.run_number }}/" rpm/harbour-sailwave-radio.spec
+          grep '^Version\|^Release' rpm/harbour-sailwave-radio.spec
+
+      - name: Build for ${{ matrix.arch }}
+        uses: coderus/github-sfos-build@sfos5
+        with:
+          release: ${{ inputs.release }}
+          arch: ${{ matrix.arch }}
+
+      - name: Keep the RPM
+        uses: actions/upload-artifact@v4
+        with:
+          name: harbour-sailwave-radio-${{ matrix.arch }}-run${{ github.run_number }}
+          path: RPMS/*.rpm
+          if-no-files-found: error
