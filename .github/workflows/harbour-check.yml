@@ -14,6 +14,10 @@ on:
         description: 'Sailfish OS build target'
         required: true
         default: '5.2.0.15'
+      store:
+        description: 'Check the Store variant (--with store); off = the full package'
+        type: boolean
+        default: true
 
 jobs:
   check:
@@ -26,6 +30,7 @@ jobs:
       # The Store build is "--with store"; mb2 builds the default, so make
       # the store variant the default for this check only
       - name: Select the Store variant
+        if: ${{ inputs.store }}
         run: |
           sed -i 's/^%bcond_with store/%bcond_without store/' rpm/*.spec
           grep -n 'bcond' rpm/*.spec
