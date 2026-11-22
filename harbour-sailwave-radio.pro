@@ -25,15 +25,6 @@ INCLUDEPATH += /usr/include/Sailfish
 # sailplay-sdk/README.md): Sailwave in the car with Sailplay
 include(sailplay-sdk/sailplay-sdk.pri)
 
-# Jolla Store build without Sailplay: qmake CONFIG+=store, from the spec
-# with "--with store" (the Sailjail profile below is not allowed there)
-CONFIG(store): DEFINES += SAILWAVE_STORE
-!CONFIG(store) {
-    sailjailprofile.files = rpm/harbour-sailwave-radio.profile
-    sailjailprofile.path = /etc/sailjail/permissions
-    INSTALLS += sailjailprofile
-}
-
 SOURCES += src/harbour-sailwave.cpp \
     src/artcomposer.cpp \
     src/nextcloudlogin.cpp \
@@ -53,7 +44,6 @@ HEADERS += \
 # Listed only so that Qt Creator shows them in the project tree.
 # Installation is handled by CONFIG += sailfishapp (the whole qml/ folder).
 OTHER_FILES += rpm/harbour-sailwave-radio.spec \
-    rpm/harbour-sailwave-radio.profile \
     sailplay-sdk/README.md \
     harbour-sailwave-radio.desktop \
     qml/harbour-sailwave.qml \

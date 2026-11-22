@@ -11,8 +11,7 @@ Categories=AudioVideo;Audio;Player;
 # Sailplay (wireless CarPlay / Android Auto, SDK v1): the car screen lists
 # Sailwave as a music app with its favourites and station history
 # (src/sailplaybridge.h). The service is the app's D-Bus name
-# (OrganizationName.ApplicationName below); the spec removes these lines in
-# the Jolla Store build.
+# (OrganizationName.ApplicationName below).
 X-Sailplay-ApiVersion=1
 X-Sailplay-Service=harbour-sailwave.harbour-sailwave
 X-Sailplay-ObjectPath=/org/sailplay/v1/App
