@@ -387,19 +387,37 @@ ApplicationWindow {
         autoPlay: false
 
         onError: {
-            console.warn("Player error: " + errorString)
+            console.warn("[Stream] Player error: " + errorString)
             attemptReconnect()
         }
 
         // A pause (button, headset, MPRIS, sleep timer) must not be undone by a
         // pending stall reconnect (it would call play() again)
         onPlaybackStateChanged: {
+            console.log("[Stream] playbackState " + _stateName(_lastPlaybackState)
+                        + " -> " + _stateName(playbackState))
             if (playbackState === MediaPlayer.PausedState) {
                 stallTimer.stop()
+                reconnectDelay.stop()
+                _pausedAt = Date.now()
+            } else if (playbackState === MediaPlayer.PlayingState
+                       && _lastPlaybackState === MediaPlayer.PausedState
+                       && !_reopening) {
+                // Resumed without togglePlayback: Sailfish gives the audio back
+                // after a call or an announcement of the car. The paused live
+                // stream is stale (the server closed it, or the audio route
+                // changed): GStreamer then fails with "Internal data stream
+                // error". Join the live stream again instead.
+                console.log("[Stream] resumed by the system after "
+                            + Math.round((Date.now() - _pausedAt) / 1000) + " s pause: reopening")
+                // Not from inside the state change handler (Qt 5.6: no Qt.callLater)
+                systemResumeTimer.restart()
             }
+            _lastPlaybackState = playbackState
         }
 
         onStatusChanged: {
+            console.log("[Stream] status " + status)
             if (status === MediaPlayer.Buffered || status === MediaPlayer.Playing) {
                 // Stream is stable again - reset the reconnect counter
                 reconnectAttempts = 0
@@ -521,7 +539,7 @@ ApplicationWindow {
             return
         }
         if (reconnectAttempts >= maxReconnectAttempts) {
-            console.warn("Reconnect aborted after " + maxReconnectAttempts + " attempts")
+            console.warn("[Stream] Reconnect aborted after " + maxReconnectAttempts + " attempts")
             // Give up visibly: stop, so the play button shows "play" again,
             // and tell the user how to recover
             stallTimer.stop()
@@ -530,11 +548,54 @@ ApplicationWindow {
             return
         }
         reconnectAttempts += 1
+        // A short, growing delay: an immediate retry fails the same way while
+        // the network or the audio route is still changing
+        console.log("[Stream] reconnect " + reconnectAttempts + "/" + maxReconnectAttempts
+                    + " in " + (reconnectAttempts * 2) + " s")
+        reconnectDelay.interval = reconnectAttempts * 2000
+        reconnectDelay.restart()
+    }
+
+    Timer {
+        id: systemResumeTimer
+        interval: 0
+        onTriggered: reopenStream("system resume")
+    }
+
+    Timer {
+        id: reconnectDelay
+        onTriggered: {
+            if (currentStation && player.playbackState !== MediaPlayer.PausedState) {
+                reopenStream("reconnect " + reconnectAttempts)
+            }
+        }
+    }
+
+    property int _lastPlaybackState: MediaPlayer.StoppedState
+    property double _pausedAt: 0
+    property bool _reopening: false
+
+    function _stateName(state) {
+        return state === MediaPlayer.PlayingState ? "playing"
+             : state === MediaPlayer.PausedState ? "paused" : "stopped"
+    }
+
+    // Joins the live stream again, as if the station had just been opened.
+    // The source is emptied first: MediaPlayer ignores setting the same URL
+    // again and would keep the broken pipeline.
+    function reopenStream(reason) {
+        if (!currentStation) {
+            return
+        }
+        console.log("[Stream] reopen (" + reason + ")")
+        _reopening = true
         player.stop()
+        player.source = ""
         player.source = currentStation.url_resolved && currentStation.url_resolved.length > 0
                          ? currentStation.url_resolved
                          : currentStation.url
         player.play()
+        _reopening = false
     }
 
     function playStation(station) {
@@ -544,6 +605,7 @@ ApplicationWindow {
         currentTrackTitle = ""
         reconnectAttempts = 0
         stallTimer.stop()
+        reconnectDelay.stop()
         player.stop()
         player.source = station.url_resolved && station.url_resolved.length > 0
                          ? station.url_resolved
@@ -919,6 +981,7 @@ ApplicationWindow {
 
     function togglePlayback() {
         if (isPlaying) {
+            console.log("[Stream] pause requested")
             player.pause()
         } else if (currentStation) {
             // A manual start gets the full set of reconnect attempts again
@@ -933,12 +996,8 @@ ApplicationWindow {
             // audio buffered before the pause.
             // The source is emptied first: MediaPlayer ignores setting the
             // same URL again, and only new media gives a fresh pipeline.
-            player.stop()
-            player.source = ""
-            player.source = currentStation.url_resolved && currentStation.url_resolved.length > 0
-                             ? currentStation.url_resolved
-                             : currentStation.url
-            player.play()
+            reconnectDelay.stop()
+            reopenStream("play requested")
         }
     }
 
@@ -1109,6 +1168,7 @@ ApplicationWindow {
     function stopPlayback() {
         player.stop()
         stallTimer.stop()
+        reconnectDelay.stop()
         // A running sleep timer belongs to the stopped station
         sleepTimerInstance.cancel()
         currentStation = null
