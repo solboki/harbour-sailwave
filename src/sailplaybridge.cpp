@@ -83,12 +83,17 @@ bool SailplayBridge::start()
                                       this);
     const auto browse = [this](qulonglong invocation, const QVariantMap &parameters, bool search) {
         QString error;
-        const QVariantMap page = query(parameters, search, &error);
+        QVariantMap presentation;
+        const QVariantMap page = query(parameters, search, &error, &presentation);
         if (page.isEmpty()) {
             m_provider->fail(invocation, QStringLiteral("NotFound"), error);
             return;
         }
-        m_provider->complete(invocation, QVariantMap{{QStringLiteral("content"), page}});
+        QVariantMap result{{QStringLiteral("content"), page}};
+        if (!presentation.isEmpty()) {
+            result.insert(QStringLiteral("presentation"), presentation);
+        }
+        m_provider->complete(invocation, result);
     };
     m_provider->setActionHandler(QStringLiteral("content.browse"),
         [browse](qulonglong invocation, const QVariantMap &parameters) { browse(invocation, parameters, false); });
@@ -165,7 +170,8 @@ QVariantMap SailplayBridge::state() const
     media.insert(QStringLiteral("station"), bounded(m_stationName));
     media.insert(QStringLiteral("title"), bounded(m_title));
     media.insert(QStringLiteral("playing"), m_playing);
-    return QVariantMap{{QStringLiteral("media"), media}, {QStringLiteral("content"), root()}};
+    return QVariantMap{{QStringLiteral("media"), media}, {QStringLiteral("content"), root()},
+                       {QStringLiteral("contentPresentation"), rootPresentation()}};
 }
 
 void SailplayBridge::publish()
@@ -187,7 +193,14 @@ QVariantMap SailplayBridge::root() const
     return page;
 }
 
-QVariantMap SailplayBridge::query(const QVariantMap &parameters, bool search, QString *error) const
+QVariantMap SailplayBridge::rootPresentation() const
+{
+    // Favorites and Station history as tabs
+    return SailplayContent::presentation(QStringLiteral("list"), true);
+}
+
+QVariantMap SailplayBridge::query(const QVariantMap &parameters, bool search, QString *error,
+                                  QVariantMap *presentation) const
 {
     if (!SailplayContent::validQuery(parameters, search)) {
         if (error) *error = QStringLiteral("Invalid query");
@@ -199,6 +212,7 @@ QVariantMap SailplayBridge::query(const QVariantMap &parameters, bool search, QS
 
     QString title;
     QString message;
+    QString layout = QStringLiteral("list");
     QVariantList all;
     if (search) {
         title = tr("Search");
@@ -211,7 +225,7 @@ QVariantMap SailplayBridge::query(const QVariantMap &parameters, bool search, QS
         all = root().value(QStringLiteral("items")).toList();
     } else {
         bool found = false;
-        all = folderItems(id, &title, &message, &found);
+        all = folderItems(id, &title, &message, &found, &layout);
         if (!found) {
             if (error) *error = QStringLiteral("Content folder is unavailable");
             return QVariantMap();
@@ -236,6 +250,25 @@ QVariantMap SailplayBridge::query(const QVariantMap &parameters, bool search, QS
         if (error) *error = QStringLiteral("Content page could not be built");
         return QVariantMap();
     }
+    if (presentation) {
+        *presentation = (!search && id == RootId) ? rootPresentation() : SailplayContent::presentation(layout);
+        // Each station row: its logo, and "playing" for the station on air
+        for (const QVariant &v : items) {
+            const QVariantMap row = v.toMap();
+            if (row.value(QStringLiteral("kind")).toString() != QStringLiteral("action")) continue;
+            const QVariantMap station = m_stations.value(
+                row.value(QStringLiteral("parameters")).toMap().value(QStringLiteral("key")).toString());
+            const QString rowId = row.value(QStringLiteral("id")).toString();
+            const QString name = station.value(QStringLiteral("name")).toString().trimmed();
+            const QString playback = m_playing && !name.isEmpty() && name == m_stationName.trimmed()
+                    ? QStringLiteral("playing") : QString();
+            const QString logo = station.value(QStringLiteral("favicon")).toString().trimmed();
+            // A logo address the car cannot use costs the logo, not the mark
+            if (!SailplayContent::hint(*presentation, rowId, logo, playback)) {
+                SailplayContent::hint(*presentation, rowId, QString(), playback);
+            }
+        }
+    }
     return page;
 }
 
@@ -255,10 +288,13 @@ bool SailplayBridge::hasUngrouped() const
     return !favoritesOfGroup(OtherFavoritesGroup).isEmpty();
 }
 
-QVariantList SailplayBridge::folderItems(const QString &id, QString *title, QString *message, bool *found) const
+QVariantList SailplayBridge::folderItems(const QString &id, QString *title, QString *message, bool *found,
+                                         QString *layout) const
 {
     QVariantList items;
     *found = true;
+    // Stations as cards with their logo
+    *layout = QStringLiteral("grid");
     if (id == FavoritesId) {
         *title = tr("Favorites");
         if (m_groups.isEmpty()) {
@@ -266,6 +302,8 @@ QVariantList SailplayBridge::folderItems(const QString &id, QString *title, QStr
                 items << stationItem(v.toMap());
             }
         } else {
+            // Groups on the left, the chosen group's stations on the right
+            *layout = QStringLiteral("split");
             // As on the Favorites page: the groups, then "Other favorites"
             for (const QVariant &g : m_groups) {
                 const QVariantMap group = g.toMap();

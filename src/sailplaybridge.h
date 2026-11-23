@@ -22,6 +22,13 @@ class SailplayProvider;
 // the session bus under Sailwave's D-Bus name harbour-sailwave.harbour-sailwave
 // (OrganizationName.ApplicationName of the .desktop file, declared there
 // with X-Sailplay-Service).
+//
+// Presentation hints (optional, Sailplay's Content1 "presentation", read
+// only by a car screen that knows them): the root page is a tab bar,
+// stations are shown as cards with their logo (the favicon from
+// radio-browser.info), favourites with groups are split (groups on the
+// left, the chosen group's stations on the right) and the station playing
+// now is marked. An older car screen ignores them and shows the plain lists.
 class SailplayBridge : public QObject
 {
     Q_OBJECT
@@ -44,7 +51,10 @@ public:
     qulonglong catalogVersion() const { return m_version; }
     // The pages as the car gets them, for tests (no D-Bus)
     QVariantMap root() const;
-    QVariantMap query(const QVariantMap &parameters, bool search, QString *error = nullptr) const;
+    QVariantMap rootPresentation() const;
+    // presentation: the hints of the returned page (may be null)
+    QVariantMap query(const QVariantMap &parameters, bool search, QString *error = nullptr,
+                      QVariantMap *presentation = nullptr) const;
 
 signals:
     // A station chosen in the car, as the lists have it (for playStation)
@@ -53,7 +63,8 @@ signals:
 private:
     static QString keyOf(const QString &url);
     QVariantMap stationItem(const QVariantMap &station) const;
-    QVariantList folderItems(const QString &id, QString *title, QString *message, bool *found) const;
+    QVariantList folderItems(const QString &id, QString *title, QString *message, bool *found,
+                             QString *layout) const;
     QVariantList searchItems(const QString &query) const;
     QVariantList favoritesOfGroup(int groupId) const;
     bool hasUngrouped() const;
