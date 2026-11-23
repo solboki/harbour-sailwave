@@ -388,6 +388,15 @@ ApplicationWindow {
 
         onError: {
             console.warn("[Stream] Player error: " + errorString)
+            // A paused stream (by the user, a call or another player such as
+            // a podcast app) goes stale and fails after a while. That is no
+            // reason to start playing again behind the other player: the next
+            // play request reopens the live stream anyway.
+            if (_lastPlaybackState === MediaPlayer.PausedState || _wasPausedBeforeError) {
+                console.log("[Stream] error while paused: no reconnect")
+                _wasPausedBeforeError = false
+                return
+            }
             attemptReconnect()
         }
 
@@ -396,6 +405,8 @@ ApplicationWindow {
         onPlaybackStateChanged: {
             console.log("[Stream] playbackState " + _stateName(_lastPlaybackState)
                         + " -> " + _stateName(playbackState))
+            _wasPausedBeforeError = (playbackState === MediaPlayer.StoppedState
+                                     && _lastPlaybackState === MediaPlayer.PausedState)
             if (playbackState === MediaPlayer.PausedState) {
                 stallTimer.stop()
                 reconnectDelay.stop()
@@ -574,6 +585,7 @@ ApplicationWindow {
     property int _lastPlaybackState: MediaPlayer.StoppedState
     property double _pausedAt: 0
     property bool _reopening: false
+    property bool _wasPausedBeforeError: false
 
     function _stateName(state) {
         return state === MediaPlayer.PlayingState ? "playing"
